@@ -57,20 +57,20 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name = 'Bookings')
 INSERT INTO dbo.Facilities (facility_name)
 VALUES
 	('WI-FI'),
-	('Кондиционер'),
-	('Мини-бар'),
-	('Телевизор'),
-	('Сейф'),
-	('Телефон');
+	('Air conditioner'),
+	('Mini bar'),
+	('TV'),
+	('Safe'),
+	('Telephone');
 
 INSERT INTO dbo.Rooms(room_number, room_type, price_per_night, availability)
 VALUES
-	(125, 'одноместное', 2500, 'свободно'),
-	(135, 'двухместное', 3500, 'свободно'),
-	(145, 'двухместное', 3500, 'занято'),
-	(126, 'одноместное', 2500, 'занято'),
-	(155, 'трехместное', 5500, 'свободно'),
-	(157, 'трехместное', 5500, 'занято');
+	(125, 'Single', 2500, 'Free'),
+	(135, 'Double', 3500, 'Free'),
+	(145, 'Double', 3500, 'Busy'),
+	(126, 'Single', 2500, 'Busy'),
+	(155, 'Triple', 5500, 'Free'),
+	(157, 'Triple', 5500, 'Busy');
 
 INSERT INTO dbo.RoomsToFacilities(room_id, facility_id)
 VALUES
@@ -93,27 +93,27 @@ VALUES
 	(2, 4, '2024-07-9', '2024-07-25'),
 	(3, 6, '2024-07-11', '2024-07-29');
 
-/*Найдите все доступные номера для бронирования сегодня*/
+/*Find all available rooms to book today*/
 SELECT * FROM dbo.Rooms
-WHERE availability = 'свободно';
+WHERE availability = 'Free';
 
-/*Найдите всех клиентов, чьи фамилии начинаются с буквы "S"*/
+/*Find all clients whose last names begin with a letter "S"*/
 SELECT * FROM dbo.Customers
 WHERE last_name LIKE 'S%';
 
-/*Найдите все бронирования для определенного клиента (по имени или email)*/
+/*Find all bookings for a specific customer (by name or email)*/
 SELECT * FROM dbo.Bookings B
 JOIN dbo.Customers C
 ON B.customer_id = C.customer_id
 WHERE C.first_name = 'Alexey';
 
-/*Найдите все бронирования для определенного номера*/
+/*Find all bookings for a specific room*/
 SELECT * FROM dbo.Bookings B
 JOIN dbo.Rooms R
 ON B.room_id = R.room_id
 WHERE R.room_number = 145;
 
-/*Найдите все номера, которые не забронированы на определенную дату*/
+/*Find all rooms that are not booked for a specific date*/
 SELECT * FROM dbo.Rooms R
 JOIN dbo.Bookings B
 ON R.room_id = B.room_id
