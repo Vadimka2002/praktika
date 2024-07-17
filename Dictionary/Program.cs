@@ -1,70 +1,10 @@
 ﻿using System.IO;
 using System.Xml.Linq;
 
-Dictionary<string, string> glossary = new Dictionary<string, string>();
+Dictionary<string, string> dictionary = new Dictionary<string, string>();
 Console.Write( "Введите путь к файлу: " );
-string PathToTheFile = Console.ReadLine();
-
-void AddDictionary()
-{
-    string line;
-    StreamReader sr = new StreamReader( $"{PathToTheFile}" );
-    line = sr.ReadLine();    
-    while ( line != null )
-    {
-        string[] words = line.Split( new char[] { ':' } );
-        glossary[ words[ 0 ] ] = words[ 1 ];
-        line = sr.ReadLine();
-    }
-
-    sr.Close();
-}
-
-void AddWords()
-{
-    Console.Write( $"Введите слово: " );
-    string name = Console.ReadLine();
-    Console.Write( $"Введите перевод слова {name}: " );
-    string translate = Console.ReadLine();
-    if(glossary.ContainsKey( name ) == true )
-    {
-        Console.WriteLine( $"Слово {name} уже есть в словаре, переводится как {glossary[ name ]}" );
-    }
-    else
-    {
-        glossary.Add( name, translate );
-        Console.WriteLine( $"Слово {name} добавлено в словарь." );
-    }      
-}
-
-void TranslateWords()
-{
-    Console.Write( "Введите слово, которое хотите перевести: " );
-    string name = Console.ReadLine() ;
-    if ( ( glossary.ContainsKey( name ) == false ) )
-    {
-        Console.WriteLine( "Такого слова нет в словаре." );
-        Console.WriteLine( $"Хотите добавить {name} в словарь?" );
-        Console.Write( "Введите 'Да', если хотите добавить: " );
-        if ( Console.ReadLine() == "Да" )
-            AddWords();       
-    }
-    else
-    {
-        Console.WriteLine( $"Перевод слова {name}: {glossary[name]}" );
-    }    
-}
-
-void AddDictionaryInFile()
-{
-    StreamWriter sw = new StreamWriter( $"{PathToTheFile}" );
-    foreach(string  word in glossary.Keys )
-    {
-        sw.WriteLine( $"{word}:{glossary[word]}" );
-    }
-
-    sw.Close();
-}
+string FilePath = Console.ReadLine();
+Menu();
 
 void Menu()
 {
@@ -90,7 +30,74 @@ void Menu()
                 Console.WriteLine( "Некорректный ввод" );
                 break;
         }
+    }
+}
+
+void AddDictionary()
+{
+    string line;
+    if ( !File.Exists( FilePath ) )
+    {
+        Console.WriteLine( "Файл словаря не найден, создаем новый." );
+        using ( File.Create( FilePath ) )
+        { }
+        return;
+    }
+
+    using ( StreamReader file = new StreamReader( $"{FilePath}" ) )
+    {
+        line = file.ReadLine();
+        while ( line != null )
+        {
+            string[] words = line.Split( new char[] { ':' } );
+            dictionary[ words[ 0 ] ] = words[ 1 ];
+            line = file.ReadLine();
+        }
     }    
 }
 
-Menu();
+void AddWords()
+{
+    Console.Write( $"Введите слово: " );
+    string name = Console.ReadLine();
+    Console.Write( $"Введите перевод слова {name}: " );
+    string translate = Console.ReadLine();
+    if( dictionary.ContainsKey( name ) == true )
+    {
+        Console.WriteLine( $"Слово {name} уже есть в словаре, переводится как {dictionary[ name ]}" );
+    }
+    else
+    {
+        dictionary.Add( name, translate );
+        Console.WriteLine( $"Слово {name} добавлено в словарь." );
+    }      
+}
+
+void TranslateWords()
+{
+    Console.Write( "Введите слово, которое хотите перевести: " );
+    string name = Console.ReadLine() ;
+    if ( ( dictionary.ContainsKey( name ) == false ) )
+    {
+        Console.WriteLine( "Такого слова нет в словаре." );
+        Console.WriteLine( $"Хотите добавить {name} в словарь?" );
+        Console.Write( "Введите 'Да', если хотите добавить: " );
+        if ( Console.ReadLine() == "Да" )
+            AddWords();       
+    }
+    else
+    {
+        Console.WriteLine( $"Перевод слова {name}: {dictionary[name]}" );
+    }    
+}
+
+void AddDictionaryInFile()
+{
+    using ( StreamWriter file = new StreamWriter( $"{FilePath}" ) )
+    {
+        foreach ( KeyValuePair<string, string> word in dictionary )
+        {
+            file.WriteLine( $"{word.Key}:{word.Value}" );
+        }
+    }    
+}
