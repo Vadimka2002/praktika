@@ -12,8 +12,8 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name = 'Rooms')
 		room_id INT IDENTITY(1, 1) NOT NULL,
 		room_number INT NOT NULL,
 		room_type NVARCHAR(50) NOT NULL,
-		price_per_night INT NOT NULL,
-		availability NVARCHAR(50) NOT NULL,
+		price_per_night MONEY NOT NULL,
+		availability BIT NOT NULL,
 		CONSTRAINT PK_Rooms_room_id PRIMARY KEY (room_id)		
 	);
 
@@ -21,7 +21,7 @@ IF NOT EXISTS (SELECT * FROM sysobjects WHERE name = 'RoomsToFacilities')
 	CREATE TABLE dbo.RoomsToFacilities (
 		room_id INT  NOT NULL,
 		facility_id INT NOT NULL,		
-		CONSTRAINT PK_RoomsToFacilities_room_id PRIMARY KEY (room_id),
+		CONSTRAINT PK_RoomsToFacilities_room_id PRIMARY KEY (facility_id),
 
 		CONSTRAINT FK_RoomsToFacilities_facility_id
 			FOREIGN KEY (facility_id) REFERENCES dbo.Facilities (facility_id),
@@ -65,12 +65,12 @@ VALUES
 
 INSERT INTO dbo.Rooms(room_number, room_type, price_per_night, availability)
 VALUES
-	(125, 'Single', 2500, 'Free'),
-	(135, 'Double', 3500, 'Free'),
-	(145, 'Double', 3500, 'Busy'),
-	(126, 'Single', 2500, 'Busy'),
-	(155, 'Triple', 5500, 'Free'),
-	(157, 'Triple', 5500, 'Busy');
+	(125, 'Single', 2500, 1),
+	(135, 'Double', 3500, 1),
+	(145, 'Double', 3500, 0),
+	(126, 'Single', 2500, 0),
+	(155, 'Triple', 5500, 1),
+	(157, 'Triple', 5500, 0);
 
 INSERT INTO dbo.RoomsToFacilities(room_id, facility_id)
 VALUES
@@ -95,7 +95,7 @@ VALUES
 
 /*Find all available rooms to book today*/
 SELECT * FROM dbo.Rooms
-WHERE availability = 'Free';
+WHERE availability = 1;
 
 /*Find all clients whose last names begin with a letter "S"*/
 SELECT * FROM dbo.Customers
@@ -114,7 +114,8 @@ ON B.room_id = R.room_id
 WHERE R.room_number = 145;
 
 /*Find all rooms that are not booked for a specific date*/
-SELECT * FROM dbo.Rooms R
-JOIN dbo.Bookings B
-ON R.room_id = B.room_id
-WHERE ('2024-07-15' < B.check_in_date) OR (B.check_out_date > '2024-07-15');
+SELECT * FROM dbo.Rooms
+WHERE  availability <> 0 AND room_id NOT IN (
+ SELECT room_id FROM dbo.Bookings 
+ WHERE '2024-12-10' BETWEEN check_in_date AND check_out_date
+ );
